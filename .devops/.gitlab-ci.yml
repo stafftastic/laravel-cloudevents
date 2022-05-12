@@ -1,0 +1,78 @@
+image: lorisleiva/laravel-docker:8.0
+
+cache:
+  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+
+stages:
+  - preparation
+  - test
+  - deploy
+
+install dependencies:
+  stage: preparation
+  script:
+    - composer install --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+  cache:
+    paths:
+    - vendor
+  except:
+    refs:
+      - tags
+    variables:
+      - $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
+
+static analysis:
+  stage: test
+  script:
+    - ./vendor/bin/psalm
+  dependencies:
+    - install dependencies
+  cache:
+    paths:
+    - vendor
+    policy: pull
+  except:
+    refs:
+      - tags
+    variables:
+      - $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
+
+codestyle:
+  stage: test
+  script:
+    - ./vendor/bin/phpcs --extensions=php --standard=PSR2 src
+  dependencies:
+    - install dependencies
+  cache:
+    paths:
+    - vendor
+    policy: pull
+  except:
+    refs:
+      - tags
+    variables:
+      - $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
+
+copy paste detection:
+  stage: test
+  script:
+    - test -f phpcpd.phar || curl -L https://phar.phpunit.de/phpcpd.phar -o phpcpd.phar
+    - php phpcpd.phar src --min-lines=50
+  cache:
+    paths:
+      - phpcpd.phar
+  except:
+    refs:
+      - tags
+    variables:
+      - $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
+
+publish package:
+  stage: deploy
+  script:
+    - 'curl --header "Job-Token: $CI_JOB_TOKEN" --data tag=$CI_COMMIT_TAG "https://git.ops.mattershost.com/api/v4/projects/$CI_PROJECT_ID/packages/composer"'
+  only:
+    refs:
+      - tags
+    variables:
+      - $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+$/
