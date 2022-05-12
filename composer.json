@@ -12,7 +12,9 @@
     "minimum-stability": "stable",
     "require": {
         "php": "^8.0",
-        "illuminate/support": "^6.0|^7.0|^8.0|^9.0"
+        "illuminate/support": "^6.0|^7.0|^8.0|^9.0",
+        "dapr/php-sdk": "dev-feature/cloudevent-replacement",
+        "cloudevents/sdk-php": "^1.0"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.5",
@@ -24,6 +26,12 @@
             "stafftastic\\CloudEvents\\": "src"
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/CiiDyR/php-sdk"
+        }
+    ],
     "extra": {
         "laravel": {
             "providers": [
