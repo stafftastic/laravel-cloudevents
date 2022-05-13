@@ -2,7 +2,7 @@
 
 namespace stafftastic\CloudEvents;
 
-class DomainEventSubscriber
+class EventSubscriber
 {
     public function __construct(
         protected EventPublisher $eventPublisher,
