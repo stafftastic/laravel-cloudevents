@@ -40,7 +40,7 @@ class CloudEventsServiceProvider extends ServiceProvider implements DeferrablePr
         $this->app->bind(
             DaprClient::class,
             fn (ContainerInterface $container) => DaprClient::clientBuilder()
-                ->useHttpClient($this->app['config']['endpoint'])
+                ->useHttpClient($this->app['config']['cloudevents']['endpoint'])
                 ->withLogger($container->get(LoggerInterface::class))
                 ->withSerializationConfig($container->get(SerializationConfig::class))
                 ->withDeserializationConfig($container->get(DeserializationConfig::class))
