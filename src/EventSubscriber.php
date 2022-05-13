@@ -9,8 +9,8 @@ class EventSubscriber
     ) {
     }
 
-    public function handle(string $eventName, array $data)
+    public function handle(CloudEventable $event)
     {
-        $this->eventPublisher->publish($data[0]);
+        $this->eventPublisher->publish($event);
     }
 }

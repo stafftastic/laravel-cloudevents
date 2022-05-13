@@ -30,7 +30,7 @@ class CloudEventsServiceProvider extends ServiceProvider implements DeferrablePr
         );
 
         Event::listen(
-            '*',
+            CloudEventable::class,
             [EventSubscriber::class, 'handle'],
         );
     }
