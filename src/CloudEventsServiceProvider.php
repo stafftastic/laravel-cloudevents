@@ -9,9 +9,8 @@ use Psr\Log\LoggerInterface;
 use Psr\Container\ContainerInterface;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Support\DeferrableProvider;
 
-class CloudEventsServiceProvider extends ServiceProvider implements DeferrableProvider
+class CloudEventsServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap unleash application services.
@@ -51,15 +50,5 @@ class CloudEventsServiceProvider extends ServiceProvider implements DeferrablePr
             EventPublisher::class,
             fn ($app) => new Dapr\EventPublisher($app->make(DaprClient::class), $app['config']['cloudevents']),
         );
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [EventPublisher::class, DaprClient::class];
     }
 }
