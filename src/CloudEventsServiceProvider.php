@@ -28,27 +28,31 @@ class CloudEventsServiceProvider extends ServiceProvider
             'cloudevents'
         );
 
-        Event::listen(
-            CloudEventable::class,
-            [EventSubscriber::class, 'handle'],
-        );
+        if ($this->app['config']['cloudevents']['enabled']) {
+            Event::listen(
+                CloudEventable::class,
+                [EventSubscriber::class, 'handle'],
+            );
+        }
     }
 
     public function register()
     {
-        $this->app->bind(
-            DaprClient::class,
-            fn (ContainerInterface $container) => DaprClient::clientBuilder()
-                ->useHttpClient($this->app['config']['cloudevents']['endpoint'])
-                ->withLogger($container->get(LoggerInterface::class))
-                ->withSerializationConfig($container->get(SerializationConfig::class))
-                ->withDeserializationConfig($container->get(DeserializationConfig::class))
-                ->build()
-        );
+        if ($this->app['config']['cloudevents']['enabled']) {
+            $this->app->bind(
+                DaprClient::class,
+                fn(ContainerInterface $container) => DaprClient::clientBuilder()
+                    ->useHttpClient($this->app['config']['cloudevents']['endpoint'])
+                    ->withLogger($container->get(LoggerInterface::class))
+                    ->withSerializationConfig($container->get(SerializationConfig::class))
+                    ->withDeserializationConfig($container->get(DeserializationConfig::class))
+                    ->build()
+            );
 
-        $this->app->bind(
-            EventPublisher::class,
-            fn ($app) => new Dapr\EventPublisher($app->make(DaprClient::class), $app['config']['cloudevents']),
-        );
+            $this->app->bind(
+                EventPublisher::class,
+                fn($app) => new Dapr\EventPublisher($app->make(DaprClient::class), $app['config']['cloudevents']),
+            );
+        }
     }
 }
