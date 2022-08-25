@@ -26,12 +26,6 @@
             "stafftastic\\CloudEvents\\": "src"
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/CiiDyR/php-sdk"
-        }
-    ],
     "extra": {
         "laravel": {
             "providers": [
