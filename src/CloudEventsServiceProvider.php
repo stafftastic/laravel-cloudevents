@@ -35,7 +35,7 @@ class CloudEventsServiceProvider extends ServiceProvider
     public function register()
     {
         if ($this->app['config']['cloudevents']['enabled']) {
-            Config::set('kafka.brokers', $this->app['config']['cloudevents']['brokers']);
+            Config::set('kafka', $this->app['config']['cloudevents']['kafka']);
             $this->app->bind(
                 EventPublisher::class,
                 fn($app) => new Kafka\EventPublisher($app['config']['cloudevents']),
