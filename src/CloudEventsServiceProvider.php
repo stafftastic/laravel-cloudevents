@@ -2,11 +2,7 @@
 
 namespace stafftastic\CloudEvents;
 
-use Dapr\Client\DaprClient;
-use Dapr\Serialization\SerializationConfig;
-use Dapr\Deserialization\DeserializationConfig;
-use Psr\Log\LoggerInterface;
-use Psr\Container\ContainerInterface;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -39,19 +35,10 @@ class CloudEventsServiceProvider extends ServiceProvider
     public function register()
     {
         if ($this->app['config']['cloudevents']['enabled']) {
-            $this->app->bind(
-                DaprClient::class,
-                fn(ContainerInterface $container) => DaprClient::clientBuilder()
-                    ->useHttpClient($this->app['config']['cloudevents']['endpoint'])
-                    ->withLogger($container->get(LoggerInterface::class))
-                    ->withSerializationConfig($container->get(SerializationConfig::class))
-                    ->withDeserializationConfig($container->get(DeserializationConfig::class))
-                    ->build()
-            );
-
+            Config::set('kafka', $this->app['config']['cloudevents']['kafka']);
             $this->app->bind(
                 EventPublisher::class,
-                fn($app) => new Dapr\EventPublisher($app->make(DaprClient::class), $app['config']['cloudevents']),
+                fn($app) => new Kafka\EventPublisher($app['config']['cloudevents']),
             );
         }
     }
