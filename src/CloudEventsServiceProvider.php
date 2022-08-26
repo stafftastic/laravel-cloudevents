@@ -5,6 +5,8 @@ namespace stafftastic\CloudEvents;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use stafftastic\CloudEvents\Console\Commands\Kafka\RestartWorkCommand;
+use stafftastic\CloudEvents\Console\Commands\Kafka\WorkCommand;
 
 class CloudEventsServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,13 @@ class CloudEventsServiceProvider extends ServiceProvider
             __DIR__.'/../config/cloudevents.php',
             'cloudevents'
         );
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                WorkCommand::class,
+                RestartWorkCommand::class,
+            ]);
+        }
 
         if ($this->app['config']['cloudevents']['enabled']) {
             Event::listen(
