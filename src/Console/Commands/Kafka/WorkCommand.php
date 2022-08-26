@@ -25,7 +25,7 @@ class WorkCommand extends Command
 
         /** @var \stafftastic\CloudEvents\Kafka\MessageHandler $handler */
         $handler = config('cloudevents.kafka.work.handler');
-        if ($handler) {
+        if (!$handler) {
             $this->error('Handler is required.');
 
             return;
