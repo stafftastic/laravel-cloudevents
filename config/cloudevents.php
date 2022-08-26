@@ -44,6 +44,11 @@ return [
         /*
          | Choose if debug is enabled or not.
          */
-        'debug' => env('KAFKA_DEBUG', false),
+        'debug' => env('LARAVEL_CLOUDEVENTS_KAFKA_DEBUG', false),
+
+        'work' => [
+            'topics' => [],
+            'handler' => null
+        ]
     ],
 ];
