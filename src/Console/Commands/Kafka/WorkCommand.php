@@ -31,9 +31,11 @@ class WorkCommand extends Command
             return;
         }
 
-        $consumer = Kafka::createConsumer($topics)
-            ->withBrokers(config('cloudevents.kafka.brokers'))
-            ->withConsumerGroupId($this->option('topics') ?? config('cloudevents.kafka.consumer_group_id'))
+        $consumer = Kafka::createConsumer(
+            $topics,
+            $this->option('topics') ?? config('cloudevents.kafka.consumer_group_id'),
+            config('cloudevents.kafka.brokers')
+        )
             ->withAutoCommit($this->option('commit'))
             ->withHandler(function (KafkaConsumerMessage $message) use ($handler) {
                 (new $handler())->handle($message);
