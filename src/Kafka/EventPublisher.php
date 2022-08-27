@@ -2,7 +2,7 @@
 
 namespace stafftastic\CloudEvents\Kafka;
 
-use CloudEvents\Serializers\Normalizers\V1\Normalizer;
+use CloudEvents\Serializers\JsonSerializer;
 use Junges\Kafka\Contracts\CanProduceMessages;
 use Junges\Kafka\Facades\Kafka;
 use Junges\Kafka\Message\Message;
@@ -35,7 +35,7 @@ class EventPublisher implements Publisher
             headers: [
                 'Content-Type' => 'application/cloudevents+json',
             ],
-            body: (new Normalizer())->normalize($event->toCloudEvent(), false),
+            body: JsonSerializer::create()->serializeStructured($event->toCloudEvent()),
         );
     }
 }

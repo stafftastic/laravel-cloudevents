@@ -10,6 +10,7 @@ class WorkCommand extends Command
 {
     protected $signature = 'cloudevents:kafka:work 
             {--topics= : The topics to listen for messages (topic1,topic2,...,topicN)} 
+            {--handler= : The handler to process messages}
             {--groupId= : The consumer group id} 
             {--commit=1}';
     protected $description = 'Consume cloudevents.';
@@ -24,7 +25,7 @@ class WorkCommand extends Command
         }
 
         /** @var \stafftastic\CloudEvents\Kafka\MessageHandler $handler */
-        $handler = config('cloudevents.kafka.work.handler');
+        $handler = $this->option('handler') ?? config('cloudevents.kafka.work.handler');
         if (!$handler) {
             $this->error('Handler is required.');
 
