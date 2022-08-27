@@ -18,8 +18,7 @@ class EventPublisher implements Publisher
 
     public function buildTopic(string $topic): CanProduceMessages
     {
-        return Kafka::publishOn($topic)
-            ->withDebugEnabled($this->config['debug_enabled']);
+        return Kafka::publishOn($topic);
     }
 
     public function publish(CloudEventable $event): bool
