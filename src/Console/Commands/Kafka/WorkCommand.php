@@ -50,7 +50,7 @@ class WorkCommand extends Command
                     $this->writeOutput($message, 'success');
                 } catch (Throwable $throwable) {
                     $this->writeOutput($message, 'failed');
-                    // TODO: maybe log the job similar to queues?
+                    throw $throwable;
                 }
             })
             ->build();
@@ -82,10 +82,13 @@ class WorkCommand extends Command
         /** @var CloudEventInterface $cloudevent */
         $cloudevent = JsonDeserializer::create()->deserializeStructured($message->getBody());
         $this->output->writeln(sprintf(
-            "<{$type}>[%s][%s] %s</{$type}> %s",
+            "<{$type}>[%s][%s] %s</{$type}> topic: %s offset: %s type: %s",
             Carbon::now()->format('Y-m-d H:i:s'),
             $cloudevent->getId(),
-            str_pad("{$status}:", 11), $cloudevent->getType()
+            str_pad("{$status}:", 11),
+            $message->getTopicName(),
+            $message->getOffset(),
+            $cloudevent->getType()
         ));
     }
 
