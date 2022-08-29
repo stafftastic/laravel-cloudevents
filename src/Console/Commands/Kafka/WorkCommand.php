@@ -3,8 +3,11 @@
 namespace stafftastic\CloudEvents\Console\Commands\Kafka;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
+use Junges\Kafka\Contracts\CanConsumeMessages;
 use Junges\Kafka\Contracts\KafkaConsumerMessage;
 use Junges\Kafka\Facades\Kafka;
+use Throwable;
 
 class WorkCommand extends Command
 {
@@ -26,7 +29,7 @@ class WorkCommand extends Command
 
         /** @var \stafftastic\CloudEvents\Kafka\MessageHandler $handler */
         $handler = $this->option('handler') ?? config('cloudevents.kafka.work.handler');
-        if (!$handler) {
+        if (! $handler) {
             $this->error('Handler is required.');
 
             return;
@@ -39,10 +42,67 @@ class WorkCommand extends Command
         )
             ->withAutoCommit($this->option('commit'))
             ->withHandler(function (KafkaConsumerMessage $message) use ($handler) {
-                (new $handler())->handle($message);
+                try {
+                    $this->writeOutput($message, 'starting');
+                    (new $handler())->handle($message);
+                    $this->writeOutput($message, 'success');
+                } catch (Throwable $throwable) {
+                    $this->writeOutput($message, 'failed');
+                    // TODO: maybe log the job similar to queues?
+                }
             })
             ->build();
 
+        if ($this->supportsAsyncSignals()) {
+            pcntl_signal(SIGINT, fn() => $this->gracefulShutdown($consumer));
+        }
+
         $consumer->consume();
+    }
+
+    protected function writeOutput(KafkaConsumerMessage $message, string $status): void
+    {
+        switch ($status) {
+            case 'starting':
+                $this->writeStatus($message, 'Processing', 'comment');
+                break;
+            case 'success':
+                $this->writeStatus($message, 'Processed', 'info');
+                break;
+            case 'failed':
+                $this->writeStatus($message, 'Failed', 'error');
+                break;
+        }
+    }
+
+    protected function writeStatus(KafkaConsumerMessage $message, string $status, string $type): void
+    {
+        $this->output->writeln(sprintf(
+            "<{$type}>[%s][%s] %s</{$type}> %s",
+            Carbon::now()->format('Y-m-d H:i:s'),
+            $message->getKey(),
+            str_pad("{$status}:", 11), $message->getKey()
+        ));
+    }
+
+    protected function supportsAsyncSignals(): bool
+    {
+        return extension_loaded('pcntl');
+    }
+
+    protected function gracefulShutdown(CanConsumeMessages $consumer): void
+    {
+        $consumer->stopConsume(function () {
+            $this->line('Stopped consuming.');
+            $this->kill();
+        });
+    }
+
+    protected function kill($status = 0){
+        if (extension_loaded('posix')) {
+            posix_kill(getmypid(), SIGKILL);
+        }
+
+        exit($status);
     }
 }
