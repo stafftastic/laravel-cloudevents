@@ -2,7 +2,7 @@
 
 namespace stafftastic\CloudEvents\Kafka;
 
-use CloudEvents\Serializers\Normalizers\V1\Normalizer;
+use CloudEvents\Serializers\JsonSerializer;
 use Junges\Kafka\Contracts\CanProduceMessages;
 use Junges\Kafka\Facades\Kafka;
 use Junges\Kafka\Message\Message;
@@ -18,8 +18,7 @@ class EventPublisher implements Publisher
 
     public function buildTopic(string $topic): CanProduceMessages
     {
-        return Kafka::publishOn($topic)
-            ->withDebugEnabled($this->config['debug_enabled']);
+        return Kafka::publishOn($topic);
     }
 
     public function publish(CloudEventable $event): bool
@@ -36,7 +35,7 @@ class EventPublisher implements Publisher
             headers: [
                 'Content-Type' => 'application/cloudevents+json',
             ],
-            body: (new Normalizer())->normalize($event->toCloudEvent(), false),
+            body: JsonSerializer::create()->serializeStructured($event->toCloudEvent()),
         );
     }
 }
