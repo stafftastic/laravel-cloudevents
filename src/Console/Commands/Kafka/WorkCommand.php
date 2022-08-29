@@ -2,12 +2,14 @@
 
 namespace stafftastic\CloudEvents\Console\Commands\Kafka;
 
+use CloudEvents\Serializers\JsonDeserializer;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Junges\Kafka\Contracts\CanConsumeMessages;
 use Junges\Kafka\Contracts\KafkaConsumerMessage;
 use Junges\Kafka\Facades\Kafka;
 use Throwable;
+use CloudEvents\V1\CloudEventInterface;
 
 class WorkCommand extends Command
 {
@@ -77,11 +79,13 @@ class WorkCommand extends Command
 
     protected function writeStatus(KafkaConsumerMessage $message, string $status, string $type): void
     {
+        /** @var CloudEventInterface $cloudevent */
+        $cloudevent = JsonDeserializer::create()->deserializeStructured($message->getBody());
         $this->output->writeln(sprintf(
             "<{$type}>[%s][%s] %s</{$type}> %s",
             Carbon::now()->format('Y-m-d H:i:s'),
-            $message->getKey(),
-            str_pad("{$status}:", 11), $message->getKey()
+            $cloudevent->getId(),
+            str_pad("{$status}:", 11), $cloudevent->getType()
         ));
     }
 
