@@ -2,9 +2,9 @@
 
 namespace stafftastic\CloudEvents\Console\Commands\Kafka;
 
+use Carbon\CarbonImmutable;
 use CloudEvents\Serializers\JsonDeserializer;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Junges\Kafka\Contracts\CanConsumeMessages;
 use Junges\Kafka\Contracts\KafkaConsumerMessage;
 use Junges\Kafka\Facades\Kafka;
@@ -92,7 +92,7 @@ class WorkCommand extends Command
     {
         $this->output->writeln(sprintf(
             "<{$type}>[%s][%s] %s</{$type}> topic: %s offset: %s type: %s",
-            Carbon::now()->format('Y-m-d H:i:s'),
+            CarbonImmutable::now()->format('Y-m-d H:i:s'),
             $cloudevent->getId(),
             str_pad("{$status}:", 11),
             $message->getTopicName(),
