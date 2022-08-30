@@ -2,7 +2,7 @@
 
 namespace stafftastic\CloudEvents\Kafka;
 
-use CloudEvents\CloudEventInterface;
+use CloudEvents\V1\CloudEventInterface;
 use Junges\Kafka\Contracts\KafkaConsumerMessage;
 use Throwable;
 
