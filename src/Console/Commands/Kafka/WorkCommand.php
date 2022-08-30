@@ -44,12 +44,15 @@ class WorkCommand extends Command
         )
             ->withAutoCommit($this->option('commit'))
             ->withHandler(function (KafkaConsumerMessage $message) use ($handler) {
+                /** @var CloudEventInterface $cloudevent */
+                $cloudevent = JsonDeserializer::create()->deserializeStructured($message->getBody());
+
                 try {
-                    $this->writeOutput($message, 'starting');
-                    (new $handler())->handle($message);
-                    $this->writeOutput($message, 'success');
+                    $this->writeOutput($message, $cloudevent, 'starting');
+                    (new $handler())->handle($message, $cloudevent);
+                    $this->writeOutput($message, $cloudevent, 'success');
                 } catch (Throwable $throwable) {
-                    $this->writeOutput($message, 'failed');
+                    $this->writeOutput($message, $cloudevent, 'failed');
                     throw $throwable;
                 }
             })
@@ -62,25 +65,31 @@ class WorkCommand extends Command
         $consumer->consume();
     }
 
-    protected function writeOutput(KafkaConsumerMessage $message, string $status): void
-    {
+    protected function writeOutput(
+        KafkaConsumerMessage $message,
+        CloudEventInterface $cloudevent,
+        string $status
+    ): void {
         switch ($status) {
             case 'starting':
-                $this->writeStatus($message, 'Processing', 'comment');
+                $this->writeStatus($message, $cloudevent, 'Processing', 'comment');
                 break;
             case 'success':
-                $this->writeStatus($message, 'Processed', 'info');
+                $this->writeStatus($message, $cloudevent, 'Processed', 'info');
                 break;
             case 'failed':
-                $this->writeStatus($message, 'Failed', 'error');
+                $this->writeStatus($message, $cloudevent, 'Failed', 'error');
                 break;
         }
     }
 
-    protected function writeStatus(KafkaConsumerMessage $message, string $status, string $type): void
+    protected function writeStatus(
+        KafkaConsumerMessage $message,
+        CloudEventInterface $cloudevent,
+        string $status,
+        string $type
+    ): void
     {
-        /** @var CloudEventInterface $cloudevent */
-        $cloudevent = JsonDeserializer::create()->deserializeStructured($message->getBody());
         $this->output->writeln(sprintf(
             "<{$type}>[%s][%s] %s</{$type}> topic: %s offset: %s type: %s",
             Carbon::now()->format('Y-m-d H:i:s'),
@@ -105,7 +114,8 @@ class WorkCommand extends Command
         });
     }
 
-    protected function kill($status = 0){
+    protected function kill($status = 0)
+    {
         if (extension_loaded('posix')) {
             posix_kill(getmypid(), SIGKILL);
         }
