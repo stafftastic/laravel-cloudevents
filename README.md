@@ -2,11 +2,6 @@
 A Laravel library to publish Illuminate Events to dapr.
 
 ## Installation
-Configure composer to connect to the gitlab composer registry:
-```bash
-composer config repositories.55 composer https://git.ops.mattershost.com/api/v4/group/55/-/packages/composer/
-```
-
 Install the package:
 ```bash
 composer require stafftastic/laravel-cloudevents
