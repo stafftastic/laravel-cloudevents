@@ -2,7 +2,7 @@
     "name": "stafftastic/laravel-cloudevents",
     "description": "A reusable cloudevent system for laravel projects.",
     "type": "library",
-    "license": "Commercial",
+    "license": "MIT",
     "authors": [
         {
             "name": "Hendrik Heil",
