@@ -1,3 +1,5 @@
-vendor/
 .devspace/
 .idea/
+.vscode/
+.direnv/
+vendor/
