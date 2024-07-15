@@ -1,5 +1,9 @@
-# Laravel Dapr CloudEvents
-A Laravel library to publish Illuminate Events to dapr.
+# Archival notice
+
+This repo is no longer maintained. We wholly recommend just using the [Laravel Kafka package](https://github.com/mateusjunges/laravel-kafka) and CloudEvents library directly.
+
+# Laravel CloudEvents
+A Laravel library to publish Illuminate Events to Kafka.
 
 ## Installation
 Install the package:
